@@ -4,6 +4,8 @@ A complete deep learning pipeline for detecting synthetic/deepfake audio and vid
 
 This repository also contains the project content prepared for GitHub publication for the AI research paper analyzer workflow.
 
+It will detect AI-based fake interview content using unstable background movement, body motion, and audio cues by uploading a video file.
+
 ---
 
 ## 🚀 Quick Start (No Commands Needed)
