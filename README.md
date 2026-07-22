@@ -2,6 +2,8 @@
 
 A complete deep learning pipeline for detecting synthetic/deepfake audio and video using spectral, temporal, spatial, and frequency-domain analysis.
 
+This repository also contains the project content prepared for GitHub publication for the AI research paper analyzer workflow.
+
 ---
 
 ## 🚀 Quick Start (No Commands Needed)
