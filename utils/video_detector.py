@@ -12,8 +12,21 @@ warnings.filterwarnings("ignore")
 
 
 # ─── Haar cascade face detector (ships with OpenCV) ───────────────────────────
-_CASCADE_PATH = cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
-_face_cascade = cv2.CascadeClassifier(_CASCADE_PATH)
+try:
+    _CASCADE_PATH = cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
+    _face_cascade = cv2.CascadeClassifier(_CASCADE_PATH)
+except Exception:
+    _face_cascade = None
+
+
+def _detect_faces(gray) -> list:
+    """Return detected faces when the OpenCV cascade is available."""
+    if _face_cascade is None:
+        return []
+    try:
+        return _face_cascade.detectMultiScale(gray, 1.1, 5, minSize=(60, 60))
+    except Exception:
+        return []
 
 
 def _extract_frames(filepath: str, max_frames: int = 30, interval: int = 5) -> list:
@@ -45,7 +58,7 @@ def _face_consistency_score(frames: list) -> dict:
 
     for frame in frames:
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        faces = _face_cascade.detectMultiScale(gray, 1.1, 5, minSize=(60, 60))
+        faces = _detect_faces(gray)
         if len(faces) > 0:
             faces_found += 1
             x, y, w, h = faces[0]
@@ -141,7 +154,7 @@ def _texture_inconsistency_score(frames: list) -> dict:
     texture_stds = []
     for frame in frames[:10]:
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        faces = _face_cascade.detectMultiScale(gray, 1.1, 5, minSize=(60, 60))
+        faces = _detect_faces(gray)
         if len(faces) == 0:
             # Fall back to center crop
             h, w = gray.shape
@@ -171,12 +184,19 @@ def _blinking_score(frames: list) -> dict:
     Early deepfakes often lacked natural eye blinking.
     Detects eye region intensity changes as a blink proxy.
     """
-    eye_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_eye.xml")
+    try:
+        eye_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_eye.xml")
+    except Exception:
+        eye_cascade = None
+
     eye_brightness = []
+
+    if eye_cascade is None or _face_cascade is None:
+        return {"score": 0.5, "blink_variance": 0}
 
     for frame in frames:
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        faces = _face_cascade.detectMultiScale(gray, 1.1, 5, minSize=(60, 60))
+        faces = _detect_faces(gray)
         for x, y, w, h in faces[:1]:
             face_roi = gray[y:y + h, x:x + w]
             eyes = eye_cascade.detectMultiScale(face_roi)

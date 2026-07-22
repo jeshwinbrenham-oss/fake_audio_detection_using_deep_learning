@@ -16,6 +16,7 @@ from utils.video_detector import analyze_video
 # ─── App setup ───────────────────────────────────────────────────────────────
 app = Flask(__name__)
 CORS(app)
+wsgi = app
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "static", "uploads")
